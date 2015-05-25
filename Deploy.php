@@ -111,16 +111,17 @@ class Deploy {
             $output = array();
                     
             // Make sure we're in the right directory
-            chdir ($this->_directory);
+            chdir($this->_directory);
             $this->log('Changing working directory...');
 
-            // Discard any changes to tracked files since our last deploy
-            $this->log('Reseting repository... ');
-            $this->log(shell_exec('git reset --hard HEAD 2>&1'));
-
             // Update the local repository
-            $this->log('Pulling in changes... ');
-            $this->log(shell_exec('git pull -v '.$this->_remote.' '.$this->_branch.' --recurse-submodules 2>&1'));
+            $this->log('Fetching repository... ');
+            $this->log(shell_exec('git fetch --all 2>&1'));
+            $this->log(shell_exec('git checkout --force '.$this->_remote.'/'.$this->_branch.' 2>&1'));
+
+            // Update submodules
+            $this->log('Updating submodules...');
+            $this->log(shell_exec('git submodule sync; git submodule update --init --recursive 2>&1'));
 
             // Secure the .git directory
             exec('chmod -R og-rx .git');
